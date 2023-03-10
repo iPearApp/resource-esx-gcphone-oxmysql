@@ -1,0 +1,4 @@
+.idea
+dist
+.npmrc
+node_modules
