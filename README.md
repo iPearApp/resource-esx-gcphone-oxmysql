@@ -6,6 +6,13 @@
 This is an example made with **oxmysql** (**1.9.2**) and **ESX (1.2)**.
 If your server doesn't work with **oxmysql** and **ESX** then you need to adapt the resource.
 
+*Note: I'm not a FiveM expert, if the resource is not optimized or doesn't work well, any help is welcome (Issues, PR, on Discord...)* 🫶
+
+## Links
+[Twitter](https://twitter.com/iPearApp) |
+[Discord](https://discord.gg/nxsnx2wSbg) |
+[Website](https://ipear.fr)
+
 ## Dependencies
 - OxMySQL (1.9.2) [[github]](https://github.com/overextended/oxmysql) (already installed on your server)
 - ESX (1.2) [[github]](https://github.com/esx-framework) (already installed on your server)
