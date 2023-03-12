@@ -5,7 +5,7 @@ import {
     insertContact,
     getContactByIdentifierAndNumber,
     updateContactById,
-    removeContactByIdentifierAndNumber
+    removeContactByIdentifierAndNumber, getIdentifierByPhoneNumber
 } from "../functions";
 
 /**
@@ -50,16 +50,15 @@ export const initContactsEventHandlers = () => {
         /** TODO: You need to check the number format !! (it's better to use a REGEX) */
 
         /** If you want to check if the phone_number exist in your database. */
-        /*const checkNumber = await exports.oxmysql.query_async("SELECT * FROM users WHERE phone_number = ?", [contact.number]);
-        if (checkNumber[0] == null) throw new Error('player-not-found');*/
+        const checkNumber: any = await getIdentifierByPhoneNumber(contact.number);
+        if (checkNumber == null) throw new Error('player-not-found');
 
         /** You can check the displayName length, or typo if you want. */
-        // if (contact.displayName.length > 64) throw new Error('unknown');
+        if (contact.displayName.length > 255) throw new Error('unknown');
 
         /** Don't let the player add multiple times the same contact. It can be source of problems on your iPear instance. */
         const checkAlreadyExist = await getContactByIdentifierAndNumber(customId, contact.number);
         if (checkAlreadyExist[0] != null) throw new Error('contact-already-exist');
-
 
         const inserted = await insertContact(customId, contact.number, contact.displayName);
         notifyContactChange(customId).then(); // don't wait the response, don't care about it
@@ -82,6 +81,11 @@ export const initContactsEventHandlers = () => {
         /**
          * TODO: Check new number format, check new displayName.
          */
+        const checkNumber: any = await getIdentifierByPhoneNumber(updated.number);
+        if (checkNumber == null) throw new Error('player-not-found');
+
+        /** You can check the displayName length, or typo if you want. */
+        if (updated.displayName.length > 255) throw new Error('unknown');
 
         await updateContactById(getContact[0].id, customId, updated.number, updated.displayName);
         notifyContactChange(customId).then(); // don't wait the response, don't care about it

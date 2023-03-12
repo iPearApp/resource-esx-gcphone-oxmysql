@@ -30,6 +30,16 @@ npm install
 npm run build
 ```
 
+## Update the SQL queries
+If your database is different/self-made, you need to update [server/functions.ts](server/functions.ts) and adapt every query.
+
+## Update inputs-checks flow
+We have added some checks when receiving events from iPear, but you can improve them to add security to your server: 
+- [server/events/contacts.ts](server/events/contacts.ts) - Contacts events (lines 82 to 88)
+- [server/events/messages.ts](server/events/messages.ts) - Messages events
+
+Since every roleplay server is different, it's not possible to check all possible cases. So you need to do it on your own. (like a Discord bot)
+
 ## Production
 
 ### 1. Prepare your files and keys
