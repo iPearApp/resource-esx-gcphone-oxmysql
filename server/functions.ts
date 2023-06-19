@@ -22,6 +22,10 @@ export function getContactByIdentifierAndNumber(identifier: string, number: stri
     return exports.oxmysql.query_async("SELECT * FROM phone_users_contacts WHERE identifier = ? AND number = ?", [identifier, number]);
 }
 
+export function getContactById(id: string) {
+    return exports.oxmysql.query_async("SELECT * FROM phone_users_contacts WHERE id = ?", [id]);
+}
+
 export function updateContactById(id: string, identifier: string, number: string, displayName: string) {
     return exports.oxmysql.update_async("UPDATE phone_users_contacts SET number = ?, display = ? WHERE identifier = ? AND id = ?", [
         number,
@@ -31,8 +35,8 @@ export function updateContactById(id: string, identifier: string, number: string
     ]);
 }
 
-export function removeContactByIdentifierAndNumber(identifier: string, number: string) {
-    return exports.oxmysql.query_async("DELETE FROM phone_users_contacts WHERE identifier = ? AND number = ?", [identifier, number]);
+export function removeContactById(id: string) {
+    return exports.oxmysql.query_async("DELETE FROM phone_users_contacts WHERE identifier = ? AND number = ?", [id]);
 }
 
 // -- MESSAGES

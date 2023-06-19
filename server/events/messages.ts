@@ -13,51 +13,59 @@ export const initMessagesEventHandlers = () => {
      * OnGetConversations is requested when a player use his profile for the first time.
      * Need to return a list of conversations (or empty list)
      */
-    client.messages.events.onGetConversations(async (customId) => {
-        const data = await getConversations(customId);
-        if (data == null) return [];
-        return data.map((x: any) => ({
+    client.messages.events.on('list', async (event) => {
+        const data: any[] = await getConversations(event.customId);
+        if (data == null)
+            return event.reply([]);
+
+        // reply to the request
+        event.reply(data.map(x => ({
             number: `${ x.transmitter }`,
-            message_content: x.message,
             self: x.owner === 1,
-            timestamp: new Date(x.time).getTime()
-        }));
+            timestamp: new Date(x.time).getTime(),
+            last_message_content: x.message
+        })));
     });
 
     /**
      * OnGetConversation is requested when a player open a conversation.
      * Need to return a list of all messages (or empty list)
      */
-    client.messages.events.onGetConversation(async (customId, number) => {
-        const data = await getConversation(customId, number);
-        if (data == null) return [];
-        return data.map((x: any) => ({
+    client.messages.events.on('conversation', async (event) => {
+        const data: any[] = await getConversation(event.customId, event.conversationNumber);
+        if (data == null)
+            return event.reply([]);
+
+        // reply to the request
+        event.reply(data.map((x: any) => ({
             number: `${ x.owner === 1 ? x.receiver : x.transmitter }`,
             message_content: x.message,
             timestamp: new Date(x.time).getTime()
-        }));
+        })));
     });
 
     /**
      * OnReceiveMessage is requested when a player sent a message from iPear.
      * Need to return a State details (success and if receiver is online)
      */
-    client.messages.events.onReceiveMessage(async (sender, recipient, data) => {
+    client.messages.events.on('message', async (event) => {
         /**
          * TODO: Check recipient number format
          */
 
-        if (data.content.length > 255) return { success: false, receiverOnline: false };
+        if (event.content.length > 255)
+            return event.reply(false, false);
 
-        const ownerNumber = sender.number;
-        if (ownerNumber == null) return { success: false, receiverOnline: false };
+        const ownerNumber = event.senderPhoneNumber;
+        if (ownerNumber == null)
+            return event.reply(false, false);
 
         // Date format for SQL
-        const dateMoment = moment(data.date.toISOString()).format("YYYY-MM-DD HH:mm:ss");
+        const dateMoment = moment(event.timestamp).format("YYYY-MM-DD HH:mm:ss");
 
         // We insert the message for the sender
-        const toSender = await insertMessage(recipient.number, ownerNumber, data.content, true, dateMoment);
-        const senderSource = ESX.GetPlayerFromIdentifier(sender.customId);
+        const toSender = await insertMessage(event.recipientPhoneNumber, ownerNumber, event.content, true, dateMoment);
+        const senderSource = ESX.GetPlayerFromIdentifier(event.senderCustomId);
         if (senderSource && senderSource.source) {
             // The player is online, we send him the new data
             const data = await getMessage(toSender);
@@ -65,13 +73,14 @@ export const initMessagesEventHandlers = () => {
         }
 
         // We insert the message for the recipient
-        const toRecipient = await insertMessage(ownerNumber, recipient.number, data.content, false, dateMoment);
-        let recipientCustomId = recipient.customId;
+        const toRecipient = await insertMessage(ownerNumber, event.recipientPhoneNumber, event.content, false, dateMoment);
+        let recipientCustomId = event.recipientCustomId;
         if (recipientCustomId == null) {
             // We try to get the phone number by the identifier
-            recipientCustomId = (await getIdentifierByPhoneNumber(recipient.number))?.identifier;
+            recipientCustomId = (await getIdentifierByPhoneNumber(event.recipientPhoneNumber))?.identifier;
             // If no identifier, the player isn't online and doesn't exist
-            if (recipientCustomId == null) return { success: true, receiverOnline: false };
+            if (recipientCustomId == null)
+                return event.reply(true, false);
         }
 
         // Get data to check if he's online
@@ -81,6 +90,6 @@ export const initMessagesEventHandlers = () => {
             const data = await getMessage(toRecipient);
             TriggerClientEvent('gcPhone:receiveMessage', recipientSource.source, data);
         }
-        return { success: true, receiverOnline: recipientSource != null };
+        event.reply(true, recipientSource != null);
     });
 }

@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "types": ["@citizenfx/server", "@types/node", "@ipear/admin", "moment"],
+    "types": ["@citizenfx/server", "@types/node", "@ipear/server", "moment"],
     "lib": ["ESNext"]
   }
 }
